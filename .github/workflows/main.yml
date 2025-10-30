@@ -22,4 +22,4 @@ jobs:
           tag: $
           name: cider-nrepl $
           generateReleaseNotes: true  # Auto-generate release notes based on PRs and commits
-          token: $
+          token: ${{ secrets.GITHUB_TOKEN }}
