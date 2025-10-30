@@ -1,0 +1,46 @@
+name: Release Workflow
+
+on:
+  # This workflow is triggered only when a tag is pushed
+  push:
+    tags:
+      - 'v*.*.*' # Matches tags like v1.0.0, v1.2.3, etc.
+
+permissions:
+  contents: write # Required to create the GitHub Release
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 1. (Optional but common) Build your assets (binaries, zip files, etc.)
+      - name: Build project assets
+        run: |
+          mkdir -p dist
+          # Create a dummy asset for demonstration
+          echo "Release version: ${{ github.ref_name }}" > dist/release_info.txt
+          zip -r dist/my-app-v${{ github.ref_name }}.zip dist/
+
+      # 2. Create the GitHub Release and upload assets
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          # The tag_name is automatically inferred from the push event (e.g., v1.0.0)
+          # The name defaults to the tag name
+          # The token defaults to ${{ github.token }}, which is sufficient
+          
+          # Uploads all files found in the 'dist' folder and the LICENSE file.
+          # Uses a newline-delimited list of glob expressions.
+          files: |
+            dist/*
+            LICENSE
+            
+          # (Optional) Generate release notes based on commit history 
+          # using GitHub's built-in feature.
+          generate_release_notes: true
+          
+          # (Optional) Mark as a pre-release if the tag contains 'rc' or 'beta'
+          prerelease: ${{ contains(github.ref_name, 'beta') || contains(github.ref_name, 'rc') }}
